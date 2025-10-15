@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Interactive Static Demo</title>
+  <style>
+    :root{--bg:#f7f8fb;--card:#fff;--text:#0b1220;--muted:#6b7280;--accent:#6366f1}
+    [data-theme="dark"]{--bg:#0b1220;--card:#0f1724;--text:#e6eef8;--muted:#9aa6bf;--accent:#7c3aed}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg);color:var(--text);line-height:1.4}
+    .container{max-width:980px;margin:32px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    h1{font-size:20px;margin:0}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{background:var(--card);border:1px solid rgba(0,0,0,0.06);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.06);margin-bottom:14px}
+    .muted{color:var(--muted);font-size:13px}
+    /* layout */
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:14px}
+    .full{grid-column:1/-1}
+    /* todo */
+    .todo-input{display:flex;gap:8px}
+    .todo-input input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);outline:none}
+    .todo-list{list-style:none;padding:0;margin:10px 0}
+    .todo-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.03);margin-bottom:8px}
+    .todo-left{display:flex;gap:8px;align-items:center}
+    .todo-left input{width:18px;height:18px}
+    .todo-text.completed{text-decoration:line-through;color:var(--muted)}
+    /* gallery */
+    .gallery{display:flex;gap:8px;flex-wrap:wrap}
+    .thumb{width:96px;height:64px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:600;background:linear-gradient(180deg,#fff4,#0000);cursor:pointer;border:1px solid rgba(0,0,0,0.04)}
+    /* modal */
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:flex;align-items:center;justify-content:center;z-index:50}
+    .modal .box{background:var(--card);padding:18px;border-radius:12px;max-width:720px;width:90%}
+    /* small */
+    .row{display:flex;gap:8px;align-items:center}
+    .counter{font-size:28px;font-weight:700}
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}.controls{gap:6px}.logo{display:none}}
+  </style>
+</head>
+<body data-theme="light">
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">IO</div>
+        <div>
+          <h1>Interactive Static Demo</h1>
+          <div class="muted">一个适合直接放到 GitHub Pages 的单文件示例</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="muted" id="time">—</div>
+        <button id="themeToggle" title="切换主题">切换主题</button>
+        <button id="clearStorage">清除本地数据</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <div>
+            <h2 style="margin:0 0 6px 0">待办清单（LocalStorage 保存）</h2>
+            <div class="muted">添加、完成、删除 — 浏览器会记住你的数据。</div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted">总数</div>
+            <div class="counter" id="totalCount">0</div>
+          </div>
+        </div>
+
+        <div class="todo-input" style="margin-top:12px">
+          <input id="todoInput" placeholder="写点什么，然后按回车或点 +" />
+          <button id="addBtn">+</button>
+        </div>
+
+        <ul class="todo-list" id="todoList"></ul>
+      </section>
+
+      <aside class="card">
+        <h3 style="margin-top:0">小工具</h3>
+        <div class="muted">点击下面的卡片试试交互效果。</div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <button id="randomQuote">随机一句鼓励的话</button>
+          <button id="animateCounter">触发计数动画</button>
+          <button id="openGallery">打开图片画廊</button>
+        </div>
+      </aside>
+
+      <section class="card full">
+        <h2 style="margin-top:0">图片画廊与模态窗口</h2>
+        <div class="muted">示例图片使用内联 SVG / 文本（无需外部资源）。点击缩略图放大。</div>
+        <div class="gallery" id="gallery" style="margin-top:12px">
+          <div class="thumb" data-title="日出" data-content="Sunrise SVG">日出</div>
+          <div class="thumb" data-title="山景" data-content="Mountain SVG">山</div>
+          <div class="thumb" data-title="海浪" data-content="Wave SVG">海</div>
+          <div class="thumb" data-title="森林" data-content="Forest SVG">林</div>
+        </div>
+      </section>
+
+      <section class="card full">
+        <h2 style="margin-top:0">联系表单（前端校验演示）</h2>
+        <div class="muted">提交会在页面展示一条模拟响应（没有后端）。</div>
+        <form id="contactForm" style="margin-top:12px;display:grid;gap:8px;max-width:600px">
+          <input id="name" placeholder="你的名字" />
+          <input id="email" placeholder="你的邮箱" />
+          <textarea id="message" placeholder="留言内容" rows="4"></textarea>
+          <div style="display:flex;gap:8px">
+            <button type="submit">发送</button>
+            <div class="muted" id="formMsg" style="align-self:center"></div>
+          </div>
+        </form>
+      </section>
+
+    </main>
+
+    <footer class="muted">保存后把这个文件放到仓库的根目录或 docs/，在 GitHub Pages 设置中选择相应分支即可访问。</footer>
+  </div>
+
+  <!-- modal placeholder -->
+  <div id="modalRoot" style="display:none"></div>
+
+  <script>
+    /* ---- small helpers ---- */
+    const $ = (s, el=document)=> el.querySelector(s);
+    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
+
+    /* ---- time display ---- */
+    function updateTime(){
+      const t = new Date();
+      $("#time").textContent = t.toLocaleString();
+    }
+    setInterval(updateTime,1000); updateTime();
+
+    /* ---- theme with localStorage ---- */
+    const themeToggle = $('#themeToggle');
+    const body = document.body;
+    function setTheme(t){ body.setAttribute('data-theme', t); localStorage.setItem('demo_theme', t); }
+    const saved = localStorage.getItem('demo_theme') || 'light'; setTheme(saved);
+    themeToggle.onclick = ()=> setTheme(body.getAttribute('data-theme')==='light'?'dark':'light');
+
+    // clear storage
+    $('#clearStorage').onclick = ()=>{ if(confirm('确定清除本地数据？')){ localStorage.clear(); location.reload(); } };
+
+    /* ---- todo app ---- */
+    const todoInput = $('#todoInput');
+    const todoList = $('#todoList');
+    const addBtn = $('#addBtn');
+    const totalCount = $('#totalCount');
+    let todos = JSON.parse(localStorage.getItem('demo_todos')||'[]');
+
+    function saveTodos(){ localStorage.setItem('demo_todos', JSON.stringify(todos)); renderTodos(); }
+    function renderTodos(){
+      todoList.innerHTML = '';
+      todos.forEach((t, i)=>{
+        const li = document.createElement('li'); li.className='todo-item';
+        const left = document.createElement('div'); left.className='todo-left';
+        const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = t.done;
+        const span = document.createElement('div'); span.className='todo-text'; span.textContent = t.text;
+        if(t.done) span.classList.add('completed');
+        chk.onchange = ()=>{ todos[i].done = chk.checked; saveTodos(); };
+        left.appendChild(chk); left.appendChild(span);
+        const right = document.createElement('div');
+        const del = document.createElement('button'); del.textContent='删除'; del.onclick = ()=>{ todos.splice(i,1); saveTodos(); };
+        right.appendChild(del);
+        li.appendChild(left); li.appendChild(right); todoList.appendChild(li);
+      });
+      totalCount.textContent = todos.length;
+    }
+
+    function addTodo(text){ if(!text || !text.trim()) return; todos.unshift({text:text.trim(),done:false}); saveTodos(); }
+    addBtn.onclick = ()=>{ addTodo(todoInput.value); todoInput.value=''; };
+    todoInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ addTodo(todoInput.value); todoInput.value=''; } });
+
+    renderTodos();
+
+    /* ---- gallery modal ---- */
+    const modalRoot = $('#modalRoot');
+    function openModal(title, content){
+      modalRoot.style.display='block';
+      modalRoot.innerHTML = `<div class="modal" id="__m"><div class="box"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>${title}</strong><button id=\"mClose\">关闭</button></div><div style=\"min-height:120px\">${content}<div style=\"margin-top:12px;color:var(--muted)\">（这是示例 SVG / 文本）</div></div></div></div>`;
+      $('#mClose', modalRoot).onclick = closeModal;
+      $('#__m', modalRoot).onclick = e=>{ if(e.target.id==='__m') closeModal(); };
+    }
+    function closeModal(){ modalRoot.style.display='none'; modalRoot.innerHTML=''; }
+
+    $('#gallery').addEventListener('click', e=>{
+      const el = e.target.closest('.thumb'); if(!el) return;
+      const title = el.dataset.title || '图片';
+      const content = `<div style="display:flex;gap:12px;align-items:center"><svg width=200 height=120 viewBox=\"0 0 200 120\"><rect width=200 height=120 rx=10 fill=\"url(#g)\"/><defs><linearGradient id=\"g\" x1=\"0%\" x2=\"100%\"><stop offset=\"0%\" stop-color=\"#a78bfa\"/><stop offset=\"100%\" stop-color=\"#60a5fa\"/></linearGradient></defs></svg><div><div style=\"font-weight:700\">${title}</div><div class=\"muted\">这是内联示例图片，适合放到静态站点。</div></div></div>`;
+      openModal(title, content);
+    });
+    $('#openGallery').onclick = ()=> document.querySelector('.thumb').click();
+
+    /* ---- random quote (local list) ---- */
+    const quotes = [
+      '坚持一下，伟大就要开始了。',
+      '学会把事情拆小，完成更容易。',
+      '休息也是生产力的一部分。',
+      '今天的你比昨天更接近目标。'
+    ];
+    $('#randomQuote').onclick = ()=> openModal('鼓励一句', `<div style="padding:12px;font-size:18px">${quotes[Math.floor(Math.random()*quotes.length)]}</div>`);
+
+    /* ---- counter animation ---- */
+    $('#animateCounter').onclick = ()=>{
+      const el = totalCount; const start = 0; const end = todos.length; const dur = 800; const t0 = performance.now();
+      requestAnimationFrame(function frame(t){ const p = Math.min(1,(t-t0)/dur); const v = Math.floor(start + (end-start)*p); el.textContent = v; if(p<1) requestAnimationFrame(frame); });
+    };
+
+    /* ---- contact form (front-end only) ---- */
+    $('#contactForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const name = $('#name').value.trim(); const email = $('#email').value.trim(); const msg = $('#message').value.trim();
+      const formMsg = $('#formMsg'); formMsg.textContent='';
+      if(!name){ formMsg.textContent='请填写名字'; return; }
+      if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ formMsg.textContent='请输入有效邮箱'; return; }
+      if(!msg){ formMsg.textContent='请输入留言内容'; return; }
+      // 模拟发送
+      formMsg.textContent='正在发送...';
+      setTimeout(()=>{ formMsg.textContent='发送成功（模拟） — 感谢你的留言！'; $('#contactForm').reset(); },700);
+    });
+
+    /* ---- niceties: save theme on toggle and keep todos in sync ----- */
+    // observe theme changes to update localStorage when toggled by keyboard
+    new MutationObserver(()=> localStorage.setItem('demo_theme', body.getAttribute('data-theme'))).observe(body, {attributes:true,attributeFilter:['data-theme']});
+
+  </script>
+</body>
+</html>
